@@ -1,6 +1,8 @@
-# 🫀 Heart Disease Prediction — End to End ML Project
+# 🫀 Heart Disease Prediction — End to End ML Product
 
-A complete end-to-end machine learning project that predicts the likelihood of heart disease using the Cleveland Heart Disease dataset. Built with a FastAPI backend and Streamlit frontend.
+## ❗ Problem Statement
+
+Heart disease is one of the leading causes of death globally. Early detection is critical but often requires expensive clinical tests and specialist interpretation. This product allows anyone to input basic patient vitals and instantly receive a risk prediction — making early screening faster, accessible, and data-driven.
 
 ---
 
@@ -29,19 +31,11 @@ Heart Disease Prediction E2E/
 
 - **Dataset:** Cleveland Heart Disease Dataset (303 samples, 13 features)
 - **Models Compared:** Logistic Regression, Random Forest, XGBoost
-- **Best Model:** XGBoost (selected based on Recall — minimizing false negatives)
-- **Threshold Tuning:** Optimized for recall to reduce missed diagnoses
-- **Serialization:** `joblib`
+- **Best Model:** XGBoost — selected based on Recall to minimize missed diagnoses
+- **Threshold Tuning:** Optimized for recall over precision
+- **Serialization:** joblib
 
----
-
-## ⚙️ Backend — FastAPI
-
-- `POST /predict` — Takes patient details, returns prediction + probability
-- `GET /health` — Check if model is loaded and API is running
-- `GET /` — Welcome page with links
-
-**Input features:**
+**Input Features:**
 
 | Feature | Description |
 |---|---|
@@ -61,11 +55,15 @@ Heart Disease Prediction E2E/
 
 ---
 
-## 🎨 Frontend — Streamlit
+## 🛠️ Tech Stack
 
-- Two column input form with labeled dropdowns
-- Color coded prediction result (✅ / ❌)
-- Disease probability metric
+| Layer | Technology |
+|---|---|
+| ML | scikit-learn, XGBoost |
+| API | FastAPI, Pydantic, Uvicorn |
+| Dashboard | Streamlit |
+| Data | Pandas, NumPy |
+| Serialization | Joblib |
 
 ---
 
@@ -76,20 +74,21 @@ Heart Disease Prediction E2E/
 pip install -r requirements.txt
 ```
 
-### 2. Start FastAPI backend
+### 2. Start FastAPI backend (Terminal 1)
 ```bash
 cd src/backend
 uvicorn main:app --reload
 ```
-API runs at: `http://127.0.0.1:8000`
-Swagger docs: `http://127.0.0.1:8000/docs`
 
-### 3. Start Streamlit frontend
+### 3. Start Streamlit frontend (Terminal 2)
 ```bash
 cd src/frontend
 streamlit run app.py
 ```
-Dashboard runs at: `http://localhost:8501`
+
+### 4. Open in browser
+- **Streamlit Dashboard** → `http://localhost:8501`
+- **FastAPI Swagger Docs** → `http://localhost:8000/docs`
 
 > ⚠️ Both terminals must be running at the same time.
 
@@ -117,18 +116,6 @@ Dashboard runs at: `http://localhost:8501`
   "result": "Heart Disease Detected"
 }
 ```
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|---|---|
-| ML | scikit-learn, XGBoost |
-| API | FastAPI, Pydantic |
-| Dashboard | Streamlit |
-| Data | Pandas, NumPy |
-| Serialization | Joblib |
 
 ---
 
