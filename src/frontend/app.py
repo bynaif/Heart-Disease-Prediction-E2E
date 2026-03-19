@@ -23,6 +23,29 @@ FEATURE_NAMES = {
 st.title("🫀 Heart Disease Predictor")
 st.markdown("Fill in the patient details below and click **Predict** to get the result.")
 
+with st.expander("ℹ️  About this tool"):
+    st.markdown("""
+    ### What is this?
+    An AI-powered screening tool that predicts heart disease risk 
+    based on clinical parameters from the Cleveland Heart Disease dataset.
+    
+    ### Who is it for?
+    - Healthcare professionals for quick preliminary screening
+    - Patients who want to understand their risk factors
+    - Researchers studying cardiovascular risk
+    
+    ### How does it work?
+    1. Fill in the patient's clinical details
+    2. Click **Predict**
+    3. Get instant risk score + explanation of key risk factors
+    
+    ### Important
+    - Model trained on Cleveland Heart Disease Dataset (303 patients)
+    - Optimized for **Recall** — minimizes missed diagnoses
+    - Detection threshold set at **0.3** (sensitive screening)
+    """)
+
+
 st.subheader("Patient Details")
 
 col1, col2 = st.columns(2)
@@ -149,6 +172,29 @@ if st.button("🔍 Predict"):
         Please consult a qualified cardiologist for proper clinical evaluation and treatment.
         """)
         
+        if result["heart_disease_prediction"] == 1:
+            st.subheader("📋 Recommended Next Steps")
+            prob = result["disease_probability"] * 100
+            if prob < 45:
+                st.markdown("""
+                - 🩺 Schedule a routine checkup with your GP
+                - 📊 Request a lipid panel and ECG test
+                - 🏃 Review lifestyle factors (diet, exercise, smoking)
+                """)
+            elif prob < 70:
+                st.markdown("""
+                - 🏥 Visit a cardiologist within the next 2-4 weeks
+                - 🩻 Request a stress test and echocardiogram
+                - 💊 Discuss medication options with your doctor
+                - 🚭 Immediately address lifestyle risk factors
+                """)
+            else:
+                st.markdown("""
+                - 🚨 Seek immediate medical attention
+                - 📞 Call your cardiologist today
+                - 🏥 Consider emergency cardiac evaluation
+                - ❌ Avoid strenuous physical activity until evaluated
+                """)
 
     except Exception as e:
         st.error(f"API Error: {str(e)}")
