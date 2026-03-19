@@ -11,7 +11,8 @@ Heart disease is one of the leading causes of death globally. Early detection is
 ```
 Heart Disease Prediction E2E/
 ├── data/
-│   └── heart_cleveland_upload.csv   ← Cleveland dataset
+│   ├── heart_cleveland_upload.csv   ← Cleveland dataset
+│   └── shap_background.csv          ← Background data for SHAP
 ├── model/
 │   └── heart_disease_model.pkl      ← Trained model
 ├── notebook/
@@ -31,8 +32,9 @@ Heart Disease Prediction E2E/
 
 - **Dataset:** Cleveland Heart Disease Dataset (303 samples, 13 features)
 - **Models Compared:** Logistic Regression, Random Forest, XGBoost
-- **Best Model:** XGBoost — selected based on Recall to minimize missed diagnoses
-- **Threshold Tuning:** Optimized for recall over precision
+- **Best Model:** Logistic Regression — selected based on Recall to minimize missed diagnoses
+- **Threshold Tuning:** Custom threshold of **0.3** (vs default 0.5) — optimized for Recall over Precision
+- **Explainability:** SHAP KernelExplainer — feature impact per prediction
 - **Serialization:** joblib
 
 **Input Features:**
@@ -55,13 +57,26 @@ Heart Disease Prediction E2E/
 
 ---
 
+## 🎨 Dashboard Features
+
+- **Confidence Levels** — Borderline / Moderate / High Risk banners
+- **Risk Gauge Meter** — Visual probability indicator (0–100%)
+- **SHAP Explainability** — Bar chart showing why the model made its prediction
+- **Plain English Summary** — Top risk factors explained in simple language
+- **Recommended Next Steps** — Actionable advice based on risk level
+- **Medical Disclaimer** — Responsible AI disclosure
+- **About Section** — Tool description and usage guide
+
+---
+
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
 |---|---|
-| ML | scikit-learn, XGBoost |
+| ML | scikit-learn, Logistic Regression |
+| Explainability | SHAP |
 | API | FastAPI, Pydantic, Uvicorn |
-| Dashboard | Streamlit |
+| Dashboard | Streamlit, Plotly |
 | Data | Pandas, NumPy |
 | Serialization | Joblib |
 
@@ -113,7 +128,13 @@ streamlit run app.py
 {
   "heart_disease_prediction": 1,
   "disease_probability": 0.5998,
-  "result": "Heart Disease Detected"
+  "result": "Heart Disease Detected",
+  "shap_values": {
+    "cp": 0.147,
+    "oldpeak": 0.136,
+    "restecg": 0.043,
+    "ca": -0.093
+  }
 }
 ```
 
@@ -121,11 +142,15 @@ streamlit run app.py
 
 ## 🔮 Planned Features
 
-- [ ] SHAP explainability — feature impact per prediction
-- [ ] Risk meter gauge chart
-- [ ] Prediction history logging
+- [x] SHAP explainability — feature impact per prediction
+- [x] Risk meter gauge chart
+- [x] Confidence levels — Borderline / Moderate / High Risk
+- [x] Plain English summary
+- [x] Recommended next steps
 - [ ] Docker containerization
 - [ ] Cloud deployment (Render / Railway)
+- [ ] Normal range warnings per feature
+- [ ] Prediction history logging
 
 ---
 
