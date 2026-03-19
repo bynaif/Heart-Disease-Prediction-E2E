@@ -2,7 +2,6 @@ import streamlit as st
 import requests 
 import plotly.graph_objects as go
 
-
 # Feature name mapping
 FEATURE_NAMES = {
     "age":      "Age",
@@ -23,7 +22,7 @@ FEATURE_NAMES = {
 st.title("🫀 Heart Disease Predictor")
 st.markdown("Fill in the patient details below and click **Predict** to get the result.")
 
-with st.expander("ℹ️  About this tool"):
+with st.expander("ℹ️ About this tool"):
     st.markdown("""
     ### What is this?
     An AI-powered screening tool that predicts heart disease risk 
@@ -44,7 +43,6 @@ with st.expander("ℹ️  About this tool"):
     - Optimized for **Recall** — minimizes missed diagnoses
     - Detection threshold set at **0.3** (sensitive screening)
     """)
-
 
 st.subheader("Patient Details")
 
@@ -67,7 +65,6 @@ with col2:
     ca       = st.selectbox("Major Vessels Colored (0–3)", options=[0, 1, 2, 3])
     thal     = st.selectbox("Thalassemia", options=[0, 1, 2, 3], format_func=lambda x: {0: "Normal", 1: "Fixed Defect", 2: "Reversible Defect", 3: "Unknown"}[x])
 
-
 if st.button("🔍 Predict"):
     payload = {
         "age": int(age), "sex": int(sex), "cp": int(cp),
@@ -83,32 +80,46 @@ if st.button("🔍 Predict"):
         st.divider()
         st.subheader("Prediction Result")
 
+        # Confidence banner
+        prob = result["disease_probability"] * 100
+        if result["heart_disease_prediction"] == 1:
+            if prob < 45:
+                st.warning("⚠️ Borderline Risk — Further clinical tests recommended.")
+            elif prob < 70:
+                st.error("❤️‍🩹 Moderate Risk — Clinical evaluation strongly recommended.")
+            else:
+                st.error("🚨 High Risk — Immediate cardiology referral advised.")
+        else:
+            st.success("💚 Low Risk — No major indicators of heart disease detected.")
 
-        st.metric(label="Disease Probability", value=f"{result['disease_probability'] * 100:.2f}%")
-        
+        st.metric(label="Disease Probability", value=f"{prob:.2f}%")
+
+        # SHAP data
         shap_data = result["shap_values"]
-        
-        # Finding top 2 risk factors (highest positive SHAP values
+
+        # Top 2 risk factors (positive SHAP)
         risk_factors = {k: v for k, v in shap_data.items() if v > 0}
         top_2 = sorted(risk_factors, key=risk_factors.get, reverse=True)[:2]
         top_2_plain = [FEATURE_NAMES.get(f, f) for f in top_2]
-        
-        prob = result["disease_probability"] * 100
 
+        # Top feature by absolute impact (for healthy patients)
+        top_feature = sorted(shap_data.items(), key=lambda x: abs(x[1]), reverse=True)[0][0]
+        top_feature_plain = FEATURE_NAMES.get(top_feature, top_feature)
+
+        # Summary
         if result["heart_disease_prediction"] == 1:
             if len(top_2_plain) >= 2:
-                summary = f"⚠️ **{top_2_plain[0]}** and **{top_2_plain[1]}** are the biggest contributors to this patient's risk score."
+                summary = f"**{top_2_plain[0]}** and **{top_2_plain[1]}** are the biggest contributors to this patient's risk score. These are strong clinical indicators that should not be ignored."
             elif len(top_2_plain) == 1:
-                summary = f"⚠️ **{top_2_plain[0]}** is the biggest contributor to this patient's risk score."
+                summary = f"**{top_2_plain[0]}** is the biggest contributor to this patient's risk score."
             else:
-                summary = "⚠️ Multiple factors are contributing to this patient's risk score."
+                summary = "Multiple factors are contributing to this patient's risk score."
         else:
-            summary = "✅ No major risk factors detected. Patient shows healthy clinical indicators."
+            summary = f"✅ No significant risk detected. **{top_feature_plain}** shows the most variation but remains within acceptable range."
 
         st.info(summary)
 
-        
-        prob = result["disease_probability"] * 100
+        # Risk gauge
         if prob < 30:
             risk_level = "Low Risk"
             color = "green"
@@ -118,63 +129,55 @@ if st.button("🔍 Predict"):
         else:
             risk_level = "High Risk"
             color = "red"
-            
-            
+
         fig_gauge = go.Figure(go.Indicator(
             mode="gauge+number",
             value=prob,
             number={"suffix": "%"},
             title={"text": f"Risk Level: {risk_level}"},
             gauge={
-                "axis" : {"range" : [0,100]},
-                "bar" : {"color": color},
-                "steps" : [
+                "axis": {"range": [0, 100]},
+                "bar": {"color": color},
+                "steps": [
                     {"range": [0, 30],   "color": "#d4edda"},
                     {"range": [30, 60],  "color": "#fff3cd"},
                     {"range": [60, 100], "color": "#f8d7da"},
                 ],
             }
         ))
-        
         st.plotly_chart(fig_gauge, use_container_width=True)
-        
-        
+
+        # SHAP bar chart
         st.subheader("🔍 Why this prediction?")
-        
-        shap_data = result["shap_values"]
-        
-        # Sorting by absolute impact 
         sorted_shap = sorted(shap_data.items(), key=lambda x: abs(x[1]))
         features = [FEATURE_NAMES.get(str(k), str(k)) for k, v in sorted_shap]
-        values = [float(v) for k, v in sorted_shap]
-        colors = ["red" if v > 0 else "green" for v in values]
-        
+        values   = [float(v) for k, v in sorted_shap]
+        colors   = ["red" if v > 0 else "green" for v in values]
+
         fig_shap = go.Figure(go.Bar(
             x=values,
             y=features,
             orientation="h",
             marker_color=colors
         ))
-        
         fig_shap.update_layout(
             xaxis_title="Impact on Prediction",
-            yaxis_title = "Feature",
-            height = 400
+            yaxis_title="Feature",
+            height=400
         )
-        
         st.plotly_chart(fig_shap, use_container_width=True)
         st.caption("🔴 Red = increases heart disease risk  |  🟢 Green = decreases risk")
-        
-        
+
+        # Disclaimer
         st.warning("""
         **⚠️ Medical Disclaimer**  
         This tool is for **screening purposes only** and does not constitute a medical diagnosis.  
         Please consult a qualified cardiologist for proper clinical evaluation and treatment.
         """)
-        
+
+        # Next steps
         if result["heart_disease_prediction"] == 1:
             st.subheader("📋 Recommended Next Steps")
-            prob = result["disease_probability"] * 100
             if prob < 45:
                 st.markdown("""
                 - 🩺 Schedule a routine checkup with your GP
