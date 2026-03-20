@@ -1,0 +1,2 @@
+timestamp,age,sex,cp,trestbps,chol,fbs,restecg,thalach,exang,oldpeak,slope,ca,thal,probability,prediction,result
+2026-03-20 20:07:14,55,1,3,140,220,0,0,140,0,1.2,1,1,2,0.9448,1,Heart Disease Detected

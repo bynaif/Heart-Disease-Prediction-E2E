@@ -7,6 +7,8 @@ from fastapi.responses import HTMLResponse
 from typing import Annotated
 import os
 import shap 
+import csv
+from datetime import datetime
 
 app = FastAPI(
     title="Heart Disease Prediction API",
@@ -33,7 +35,29 @@ if not os.path.exists(BACKGROUND_PATH):
     raise RuntimeError(f"Background data not found at {BACKGROUND_PATH}")
 
 background_data = pd.read_csv(BACKGROUND_PATH)
-    
+
+
+
+# Logging setup
+LOG_PATH = os.path.join(BASE_DIR, "data", "predictions_log.csv")
+
+def log_prediction(patient_data : dict, probability: float, prediction: int, result : str):
+    row = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        **patient_data,
+        "probability": probability,
+        "prediction": prediction,
+        "result": result
+    }
+
+    file_exists = os.path.isfile(LOG_PATH)
+    with open(LOG_PATH, "a", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=row.keys())
+        if not file_exists:
+            writer.writeheader()
+        writer.writerow(row)
+
+
 
 # Input Schema
 class PatientDetails(BaseModel):
@@ -92,6 +116,13 @@ def predict(patient: PatientDetails):
         shap_vals = explainer.shap_values(df)
         feature_impact = dict(zip(df.columns, shap_vals[0].tolist()))
 
+        log_prediction(
+            patient_data=patient.model_dump(),
+            probability = round(float(probability), 4),
+            prediction = int(prediction),
+            result = "Heart Disease Detected" if prediction == 1 else "No Heart Disease"
+        )
+        
         return PredictionResponse(
             heart_disease_prediction=int(prediction),
             disease_probability=round(float(probability), 4),
