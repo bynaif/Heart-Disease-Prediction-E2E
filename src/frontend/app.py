@@ -74,7 +74,7 @@ if st.button("🔍 Predict"):
     }
 
     try:
-        response = requests.post("http://127.0.0.1:8000/predict", json=payload)
+        response = requests.post("http://127.0.0.1:8001/predict", json=payload)
         result   = response.json()
 
         st.divider()
