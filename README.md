@@ -2,7 +2,39 @@
 
 ## ❗ Problem Statement
 
-Heart disease is one of the leading causes of death globally. Early detection is critical but often requires expensive clinical tests and specialist interpretation. This product allows anyone to input basic patient vitals and instantly receive a risk prediction — making early screening faster, accessible, and data-driven.
+Heart disease is the **#1 cause of death globally** — killing 17.9 million people every year. The core problem isn't just medical. It's economic and systemic:
+
+- Late-stage heart disease treatment costs **$1M+ per patient**
+- Early detection reduces that to **~$10,000**
+- That's a **100x cost difference**
+- Clinics in developing countries lack fast, affordable screening tools
+- Specialists are expensive, waiting lists are long, patients arrive too late
+
+This product addresses that gap — allowing anyone to input basic clinical vitals and instantly receive a risk prediction with full explainability, making early screening faster, accessible, and data-driven.
+
+---
+
+## 🌍 Live Demo
+
+👉 **[https://heart-disease-prediction-e2e.onrender.com](https://heart-disease-prediction-e2e.onrender.com)**
+
+---
+
+## 💡 Use Case & ROI
+
+| Scenario | Without Tool | With Tool |
+|---|---|---|
+| Screening time | Hours (specialist needed) | < 2 seconds |
+| Cost per screening | $200–$500 | Near zero |
+| Accessibility | Hospital only | Any device, anywhere |
+| Explainability | Doctor's intuition | SHAP-driven feature impact |
+| Detection threshold | Standard 0.5 | Tuned to 0.3 (recall-optimized) |
+
+**Target users:**
+- Rural clinics with no specialist access
+- General practitioners doing quick triage
+- Patients who want to understand their own risk factors
+- Researchers studying cardiovascular risk patterns
 
 ---
 
@@ -12,7 +44,8 @@ Heart disease is one of the leading causes of death globally. Early detection is
 Heart Disease Prediction E2E/
 ├── data/
 │   ├── heart_cleveland_upload.csv   ← Cleveland dataset
-│   └── shap_background.csv          ← Background data for SHAP
+│   ├── shap_background.csv          ← Background data for SHAP
+│   └── predictions_log.csv          ← Auto-generated prediction logs
 ├── model/
 │   └── heart_disease_model.pkl      ← Trained model
 ├── notebook/
@@ -22,6 +55,11 @@ Heart Disease Prediction E2E/
 │   │   └── main.py                  ← FastAPI app
 │   └── frontend/
 │       └── app.py                   ← Streamlit dashboard
+├── .github/
+│   └── workflows/
+│       └── deploy.yml               ← CI/CD pipeline
+├── Dockerfile
+├── start.sh
 ├── requirements.txt
 └── README.md
 ```
@@ -36,6 +74,8 @@ Heart Disease Prediction E2E/
 - **Threshold Tuning:** Custom threshold of **0.3** (vs default 0.5) — optimized for Recall over Precision
 - **Explainability:** SHAP KernelExplainer — feature impact per prediction
 - **Serialization:** joblib
+
+> **Why Recall over Accuracy?** In medicine, a false negative is dangerous — missing a sick patient is worse than flagging a healthy one. Tuning from 0.5 → 0.3 catches more at-risk patients even at the cost of more false alarms.
 
 **Input Features:**
 
@@ -64,6 +104,7 @@ Heart Disease Prediction E2E/
 - **SHAP Explainability** — Bar chart showing why the model made its prediction
 - **Plain English Summary** — Top risk factors explained in simple language
 - **Recommended Next Steps** — Actionable advice based on risk level
+- **Prediction Logging** — Every prediction saved to CSV automatically
 - **Medical Disclaimer** — Responsible AI disclosure
 - **About Section** — Tool description and usage guide
 
@@ -79,33 +120,57 @@ Heart Disease Prediction E2E/
 | Dashboard | Streamlit, Plotly |
 | Data | Pandas, NumPy |
 | Serialization | Joblib |
+| Containerization | Docker |
+| Deployment | Render |
+| CI/CD | GitHub Actions |
+
+---
+
+## 💪 Strengths
+
+- **Recall-optimized** — catches more sick patients, medically justified decision
+- **Explainable AI** — SHAP shows exactly why each prediction was made
+- **Full MLOps pipeline** — Docker + CI/CD + logging + live deployment
+- **Human-friendly** — plain English summaries, actionable next steps
+- **Responsible AI** — medical disclaimer, confidence levels, not just binary output
+
+---
+
+## ⚠️ Limitations & Honest Notes
+
+- **Small dataset** — 303 samples is not production scale. Model performance may not generalize to all populations
+- **CSV logging** — used for simplicity as this is a first MLOps project. A production system would use a proper database (PostgreSQL, SQLite) with timestamps, user tracking, and drift monitoring
+- **No authentication** — anyone can hit the API. Production would require API keys or OAuth
+- **No model monitoring** — no automated alerts if model performance degrades over time
+- **Not a medical device** — this is a screening tool and prototype, not a certified clinical diagnostic tool. Always consult a qualified cardiologist
 
 ---
 
 ## 🚀 How to Run
 
-### 1. Install dependencies
+### Option A — Live Demo
+👉 **[https://heart-disease-prediction-e2e.onrender.com](https://heart-disease-prediction-e2e.onrender.com)**
+
+### Option B — Docker
 ```bash
+docker build -t heart-disease .
+docker run -p 8000:8000 -p 8001:8001 heart-disease
+```
+Open `http://localhost:8000`
+
+### Option C — Local
+```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### 2. Start FastAPI backend (Terminal 1)
-```bash
+# Terminal 1 — FastAPI
 cd src/backend
-uvicorn main:app --reload
-```
+uvicorn main:app --host 0.0.0.0 --port 8001 --reload
 
-### 3. Start Streamlit frontend (Terminal 2)
-```bash
+# Terminal 2 — Streamlit
 cd src/frontend
 streamlit run app.py
 ```
-
-### 4. Open in browser
-- **Streamlit Dashboard** → `http://localhost:8501`
-- **FastAPI Swagger Docs** → `http://localhost:8000/docs`
-
-> ⚠️ Both terminals must be running at the same time.
 
 ---
 
@@ -140,26 +205,7 @@ streamlit run app.py
 
 ---
 
-## ✅ Completed Features
-- [x] SHAP explainability — feature impact per prediction
-- [x] Risk meter gauge chart
-- [x] Confidence levels — Borderline / Moderate / High Risk
-- [x] Plain English summary
-- [x] Recommended next steps per risk level
-- [x] Medical disclaimer
-- [x] Custom threshold (0.3) for recall optimization
-
-## 🔮 Planned Features — MLOps Roadmap
-- [ ] Prediction logging — CSV log of every prediction made
-- [ ] Docker containerization
-- [ ] Cloud deployment (Render)
-- [ ] CI/CD pipeline — GitHub Actions auto deploy
-- [ ] MLflow model registry — experiment tracking
-- [ ] Normal range warnings per input feature
-- [ ] Model performance monitoring
-
----
-
 ## 👤 Author
 
-**Mohammad Naif** — Cool Data Science Undergrad Student 
+**Mohammad Naif** — Cool Data Science Undergrad Student  
+Building towards a career in Agentic AI Engineering 🚀
