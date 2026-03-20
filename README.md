@@ -140,20 +140,27 @@ streamlit run app.py
 
 ---
 
-## 🔮 Planned Features
-
+## ✅ Completed Features
 - [x] SHAP explainability — feature impact per prediction
 - [x] Risk meter gauge chart
 - [x] Confidence levels — Borderline / Moderate / High Risk
 - [x] Plain English summary
-- [x] Recommended next steps
+- [x] Recommended next steps per risk level
+- [x] Medical disclaimer
+- [x] Custom threshold (0.3) for recall optimization
+
+## 🔮 Planned Features — MLOps Roadmap
+- [ ] Prediction logging — CSV log of every prediction made
 - [ ] Docker containerization
-- [ ] Cloud deployment (Render / Railway)
-- [ ] Normal range warnings per feature
-- [ ] Prediction history logging
+- [ ] Cloud deployment (Render)
+- [ ] CI/CD pipeline — GitHub Actions auto deploy
+- [ ] MLflow model registry — experiment tracking
+- [ ] Normal range warnings per input feature
+- [ ] Model performance monitoring
 
 ---
 
 ## 👤 Author
 
 **Mohammad Naif** — Cool Data Science Undergrad Student  
+Building towards a career in Agentic AI Engineering 🚀
